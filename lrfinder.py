@@ -7,6 +7,7 @@ import torch
 from tqdm.autonotebook import tqdm
 from torch.optim.lr_scheduler import _LRScheduler
 import matplotlib.pyplot as plt
+import torch.nn.functional as F
 
 try:
     from apex import amp
@@ -224,7 +225,6 @@ class LRFinder(object):
     def _train_batch(self, iter_wrapper, accumulation_steps):
         self.model.train()
         total_loss = None  # for late initialization
-
         self.optimizer.zero_grad()
         for i in range(accumulation_steps):
             inputs, labels = iter_wrapper.get_batch()
@@ -232,8 +232,8 @@ class LRFinder(object):
 
             # Forward pass
             outputs = self.model(inputs)
-            loss = self.criterion(outputs, labels)
-
+            #loss = self.criterion(outputs, labels)
+            loss=F.nll_loss(outputs,labels)
             # Loss should be averaged in each step
             loss /= accumulation_steps
 
